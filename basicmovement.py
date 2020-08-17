@@ -3,7 +3,6 @@ import random
 class Snake():
     
     def __init__(self):
-        print('init is ran')
         self.root = Tk()
         Snake.my_canvas = Canvas(self.root, height=375, width=375, bg='black')
         Snake.my_canvas.grid(row=0, column=0)
@@ -17,7 +16,7 @@ class Snake():
             Snake.my_canvas.create_line(width, 0, width, 500, fill='white')
 
         self.head = Snake.my_canvas.create_rectangle(225, 225, 250, 250, fill='light green', tags='item')
-        self.snake_body = [self.head]
+        self.snake_body = []
         #*Trying to move this thing.
         #https://stackoverflow.com/questions/15269682/python-tkinter-canvas-fail-to-bind-keyboard
         self.up_bind = self.root.bind("<w>", lambda event: self.up(event))
@@ -44,14 +43,16 @@ class Snake():
         if self.snake_direction == self.last_direction:
             #*I will first check whether there are any items in the self.turns list I have to catch up on.
             if len(self.turns) == 0:
+                Snake.my_canvas.move(self.head, self.x, self.y)
                 for item in self.snake_body:
                     Snake.my_canvas.move(item, self.x, self.y)
-            
+            #*I have an issue in which the snake head moves two 
             #*The case in which the head has turned, but the body hasn't kept up.
             else:
                 #*I think I have to keep the head and all the already turned body parts separate in a list.
                 #*These parts have to be treated separately.
                 Snake.my_canvas.move(self.head, self.x, self.y)
+                self.not_moved = self.snake_body.copy()
                 for part in self.snake_body:
                     #*if coordinate has matched
                     if Snake.my_canvas.coords(part) == self.turns[0][0]:
@@ -77,12 +78,12 @@ class Snake():
                 
         
         else:
-            print('turned')
             #*I will obviously have to get the coords of the head and check add the turning point
             #*Temporary variable to store list
             turn_add = []
             turn_add.append(Snake.my_canvas.coords(self.head))
             turn_add.append(self.snake_direction)
+            #!I will have keep track of which body parts have already catched up and which didn't.
             self.turns.append(turn_add)
             print(self.turns)
             Snake.my_canvas.move(self.head, self.x, self.y)
@@ -93,7 +94,6 @@ class Snake():
         self.snake_y2 = Snake.my_canvas.coords(self.head)[3] 
 
         print(Snake.my_canvas.coords(self.head))
-        print(Snake.my_canvas.coords(Apple.apple_1))
 
         #*I should definitely make a variable to manage whether the after function will run next time or not.
         self.after_var = True
