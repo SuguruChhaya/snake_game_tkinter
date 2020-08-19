@@ -153,32 +153,18 @@ class Snake():
             Snake.my_canvas.delete(Apple.apple_1)
             Apple.apple_count -= 1
             self.after_var = True
-
-        # *Check if there are constantly 1 or more apples
         if Apple.apple_count == 0:
             b.create_apple()
 
+        # *Check if there are constantly 1 or more apples
+
+
         # *If hit the wall, freeze.
 
-        if self.snake_x1 > 350 or self.snake_x1 < 0 or self.snake_y1 > 350 or self.snake_y1 < 0:
-            # *If I can go through the walls
-            if self.wall_death:
-                # *Return to original position
-                Snake.my_canvas.move(self.head, -self.x, -self.y)
-                self.after_var = False
-            else:
-                # *Could make used moveto()
-                if self.snake_x1 > 350:
-                    Snake.my_canvas.move(self.head, -375, 0)
-                elif self.snake_x1 < 0:
-                    Snake.my_canvas.move(self.head, 375, 0)
-                elif self.snake_y1 > 350:
-                    Snake.my_canvas.move(self.head, 0, -375)
-                elif self.snake_y1 < 0:
-                    Snake.my_canvas.move(self.head, 0, 375)
+
 
         if self.after_var:
-            self.alive = Snake.my_canvas.after(200, self.movement)
+            self.alive = Snake.my_canvas.after(1000, self.movement)
         else:
             Snake.my_canvas.after_cancel(self.alive)
 

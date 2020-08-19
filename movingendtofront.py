@@ -45,24 +45,60 @@ class Snake():
     # A great reference for controlling the speed of the moving boxes.
 
     def movement(self):
-        print('movement is ran')
+        print(self.x)
+        print(self.y)
         # *Since this is the function that will constantly be running, I will want to add my checking functions here.
         # ?So much to debug here
-        self.after_var = True
-        #!Figuring out where the head is.
-        self.head = self.snake_body[0]
-        self.head_x1 = Snake.my_canvas.coords(self.head)[0]
-        self.head_y1 = Snake.my_canvas.coords(self.head)[1]
-        self.head_x2 = Snake.my_canvas.coords(self.head)[2]
-        self.head_y2 = Snake.my_canvas.coords(self.head)[3]
-
 
         Snake.my_canvas.move(self.snake_body[-1], self.x, self.y)
 
+        self.after_var = True
+        #!Figuring out where the head is.
+        self.head = self.snake_body[0]
+        self.snake_x1 = Snake.my_canvas.coords(self.head)[0]
+        self.snake_y1 = Snake.my_canvas.coords(self.head)[1]
+        self.snake_x2 = Snake.my_canvas.coords(self.head)[2]
+        self.snake_y2 = Snake.my_canvas.coords(self.head)[3]
+
+        #*The tail coordinates
+        self.tail_x1 = Snake.my_canvas.coords(self.snake_body)[0]
+        self.tail_y1 = Snake.my_canvas.coords(self.snake_body)[1]
+        self.tail_x2 = Snake.my_canvas.coords(self.snake_body)[2]
+        self.tail_y2 = Snake.my_canvas.coords(self.snake_body)[3]
+
+        #*I will have to cvhange the order of the list too.
+        self.head_index = self.snake_body.index(self.head)
+        self.snake_body[self.head_index], self.snake_body[-1] = self.snake_body[-1], self.head
+        print(self.snake_body)
+
+        if Snake.my_canvas.coords(self.head) == Snake.my_canvas.coords(Apple.apple_1):
+            self.add_length()
+            Snake.my_canvas.delete(Apple.apple_1)
+            Apple.apple_count -= 1
+
+        if Apple.apple_count == 0:
+            b.create_apple()
+
+        if self.snake_x1 > 350 or self.snake_x1 < 0 or self.snake_y1 > 350 or self.snake_y1 < 0:
+            # *If I can go through the walls
+            if self.wall_death:
+                # *Return to original position
+                Snake.my_canvas.move(self.head, -self.x, -self.y)
+                self.after_var = False
+            else:
+                # *Could make used moveto()
+                if self.snake_x1 > 350:
+                    Snake.my_canvas.move(self.head, -375, 0)
+                elif self.snake_x1 < 0:
+                    Snake.my_canvas.move(self.head, 375, 0)
+                elif self.snake_y1 > 350:
+                    Snake.my_canvas.move(self.head, 0, -375)
+                elif self.snake_y1 < 0:
+                    Snake.my_canvas.move(self.head, 0, 375)
     
 
         if self.after_var:
-            self.alive = Snake.my_canvas.after(1000, self.movement)
+            self.alive = Snake.my_canvas.after(200, self.movement)
         else:
             Snake.my_canvas.after_cancel(self.alive)
 
@@ -104,24 +140,25 @@ class Snake():
         self.snake_body.append(Snake.my_canvas.create_rectangle(
             self.add_length_x1, self.add_length_y1, self.add_length_x2, self.add_length_y2, fill='green'))
 
+    #*When the snake gets longer and starts twisting, this will not be enough
     def up(self, event):
-        self.x = 0
-        self.y = self.head_y1 - Snake.my_canvas.coords(self.snake_body[-1])[1] - 25
+        self.x = self.snake_x1 - self.
+        self.y = -25 * len(self.snake_body)
         self.snake_direction = 'up'
 
     def down(self, event):
         self.x = 0
-        self.y = Snake.my_canvas.coords(self.snake_body[-1])[1] - self.head_y1 + 25
+        self.y = 25 * len(self.snake_body)
         self.snake_direction = 'down'
 
     def left(self, event):
         #*There is a weird bug which causes the ting to skip numbers. I should fix that.
-        self.x = self.head_x1
+        self.x = -25 * len(self.snake_body)
         self.y = 0
         self.snake_direction = 'left'
 
     def right(self, event):
-        self.x = 25
+        self.x = 25 * len(self.snake_body)
         self.y = 0
         self.snake_direction = 'right'
 
