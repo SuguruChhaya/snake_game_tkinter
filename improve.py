@@ -60,13 +60,19 @@ class Snake():
         #*I have to first check whether the keyboard buttons were pressed/hold first.
         #*I can't just change everything easily
         #!Conveniently, I have the self.snake_direction variable for the last distance chosen.
-
+        
         #*I have to make it so that I can block moves where players try to go in the back direction.
+        #?I might want to do something with this is_pressed part.
+        #* I will ABSOLUTELY need the part for when the key binding isn't activated
+        #!I have to recognize that pressing the keyboard is different from the bind being activated.
+        #?I might want to create a new variable which checks whether the KEY BINDING has been activated
+        #*I can cancel the variable after moving it.
         if keyboard.is_pressed('w') or keyboard.is_pressed('s') or keyboard.is_pressed('a') or keyboard.is_pressed('d'):
             #*If 
             #!I have a bug in which when I hold the bind button for long and release it, I can go in the opposite way.
             #*To fix this issue, I think I can cancel a specific binding when I press a button.
-            #*Like when I press up, I can cancel up and down.
+            #*Like when I press up, I can cancel up and down cuz i won't need it until the next move.
+            
             temporary_check = [self.snake_direction, self.last_direction]
             if ('up' in temporary_check and 'down' in temporary_check) or ('left' in temporary_check and 'right' in temporary_check):
                 if self.last_direction == 'up':
@@ -77,6 +83,7 @@ class Snake():
                     self.left('event')
                 elif self.last_direction == 'right':
                     self.right('event')
+            
             Snake.my_canvas.move(self.snake_body[-1], self.x, self.y)
         else:
             if self.snake_direction == 'up':
@@ -88,7 +95,8 @@ class Snake():
             elif self.snake_direction == 'right':
                 self.right('event')
             Snake.my_canvas.move(self.snake_body[-1], self.x, self.y)
-
+    
+        #Snake.my_canvas.move(self.snake_body[-1], self.x, self.y)
         #!I cannot switch the first and last. Instead I have to insert the last into the front
         self.snake_body.insert(0, self.snake_body[-1])
         del(self.snake_body[-1])
@@ -222,28 +230,57 @@ class Snake():
         self.x = self.head_x1 - self.tail_x1
         self.y = self.head_y1 - self.tail_y1 - 25
         self.snake_direction = 'up'
+        self.up_bind = self.root.bind("<w>", lambda event: self.up(event))
+        self.down_bind = self.root.bind("<s>", lambda event: self.down(event))
+        self.left_bind = self.root.bind("<a>", lambda event: self.left(event))
+        self.right_bind = self.root.bind(
+            "<d>", lambda event: self.right(event))
+        self.root.unbind('<w>', self.up_bind)
+        if len(self.snake_body) > 1:
+            self.root.unbind('<s>',self.down_bind)
 
     def down(self, event):
         self.x = self.head_x1 - self.tail_x1
         self.y = self.head_y1 - self.tail_y1 + 25
         self.snake_direction = 'down'
+        self.up_bind = self.root.bind("<w>", lambda event: self.up(event))
+        self.down_bind = self.root.bind("<s>", lambda event: self.down(event))
+        self.left_bind = self.root.bind("<a>", lambda event: self.left(event))
+        self.right_bind = self.root.bind(
+            "<d>", lambda event: self.right(event))
+        self.root.unbind('<s>', self.down_bind)
+        if len(self.snake_body) > 1:
+            self.root.unbind('<w>', self.up_bind)
 
     def left(self, event):
         #!The reason it overlaps when I don't press anything is because the self.x and self.y values aren't changed.
         #* This is because I didn't constantly hold the keybindings.
-        print(f'self.head_x1: {self.head_x1}')
-        print(f'self.head_y1: {self.head_y1}')
-        print(f'self.tail_x1: {self.tail_x1}')
-        print(f'self.tail_y1: {self.tail_y1}')
         #*There is a weird bug which causes the ting to skip numbers. I should fix that.
         self.x = self.head_x1 - self.tail_x1 -25
         self.y = self.head_y1 - self.tail_y1
         self.snake_direction = 'left'
+        self.up_bind = self.root.bind("<w>", lambda event: self.up(event))
+        self.down_bind = self.root.bind("<s>", lambda event: self.down(event))
+        self.left_bind = self.root.bind("<a>", lambda event: self.left(event))
+        self.right_bind = self.root.bind(
+            "<d>", lambda event: self.right(event))
+        self.root.unbind('<a>', self.left_bind)
+        if len(self.snake_body) > 1:
+            self.root.unbind('<d>', self.right_bind)
 
     def right(self, event):
         self.x = self.head_x1 - self.tail_x1 + 25
         self.y = self.head_y1 - self.tail_y1
         self.snake_direction = 'right'
+        #*Re-bind and unbind
+        self.up_bind = self.root.bind("<w>", lambda event: self.up(event))
+        self.down_bind = self.root.bind("<s>", lambda event: self.down(event))
+        self.left_bind = self.root.bind("<a>", lambda event: self.left(event))
+        self.right_bind = self.root.bind(
+            "<d>", lambda event: self.right(event))
+        self.root.unbind('<d>', self.right_bind)
+        if len(self.snake_body) > 1:
+            self.root.unbind('<a>', self.left_bind)
 
 
 class Apple():
