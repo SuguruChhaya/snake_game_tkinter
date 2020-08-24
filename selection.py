@@ -9,4 +9,9 @@ time count mode in which I can count the amount of time taken for eating centain
 5. Feature: I lose length if I bite my own tail.
 6. Feature: In multiplayer mode: If I bite a snake's body, I gain length and they lose length. If I hit them face to face, We repel eachother.
 7. Feature: I can choose whether I want to die or live when I hit a wall. If I live, I should appear from the other side of the screen.wddwadwdwacdwacdwc
+I looked at some of the features at https://www.google.com/fbx?fbx=snake_arcade
+8. Feature: Create a loop hole. (2 Apples pop up on the screen, When I eat 1, My head moves to the other apple's place)
+
+I want to import GIFs so that players can see what selecting the setting will look like.
+
 '''

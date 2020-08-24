@@ -1,7 +1,6 @@
 from tkinter import *
 import random
 import keyboard
-
 '''
 In this version, i am going to use the strategy of moving the end block to the front instead of moving everything.
 I am going to use tags to check which is the head.
@@ -31,7 +30,6 @@ class Snake():
         self.left_bind = self.root.bind("<a>", lambda event: self.left(event))
         self.right_bind = self.root.bind(
             "<d>", lambda event: self.right(event))
-
         # *Default movement is up
         self.x = 0
         self.y = -25
@@ -47,29 +45,67 @@ class Snake():
     # A great reference for controlling the speed of the moving boxes.
 
     def movement(self):
-        print(keyboard.is_pressed('w'))
-        print('movement')
-        print(self.x)
-        print(self.y)
+        self.head_x1 = Snake.my_canvas.coords(self.snake_body[0])[0]
+        self.head_y1 = Snake.my_canvas.coords(self.snake_body[0])[1]
+        self.head_x2 = Snake.my_canvas.coords(self.snake_body[0])[2]
+        self.head_y2 = Snake.my_canvas.coords(self.snake_body[0])[3]
+
+        self.tail_x1 = Snake.my_canvas.coords(self.snake_body[-1])[0]
+        self.tail_y1 = Snake.my_canvas.coords(self.snake_body[-1])[1]
+        self.tail_x2 = Snake.my_canvas.coords(self.snake_body[-1])[2]
+        self.tail_y2 = Snake.my_canvas.coords(self.snake_body[-1])[3]
         # *Since this is the function that will constantly be running, I will want to add my checking functions here.
         # ?So much to debug here
+        #*I figured out the reason why the body parts were overlapping.
+        #*I have to first check whether the keyboard buttons were pressed/hold first.
+        #*I can't just change everything easily
+        #!Conveniently, I have the self.snake_direction variable for the last distance chosen.
 
+        #*I have to make it so that I can block moves where players try to go in the back direction.
+        if keyboard.is_pressed('w') or keyboard.is_pressed('s') or keyboard.is_pressed('a') or keyboard.is_pressed('d'):
+            #*If 
+            #!I have a bug in which when I hold the bind button for long and release it, I can go in the opposite way.
+            #*To fix this issue, I think I can cancel a specific binding when I press a button.
+            #*Like when I press up, I can cancel up and down.
+            temporary_check = [self.snake_direction, self.last_direction]
+            if ('up' in temporary_check and 'down' in temporary_check) or ('left' in temporary_check and 'right' in temporary_check):
+                if self.last_direction == 'up':
+                    self.up('event')
+                elif self.last_direction == 'down':
+                    self.down('event')
+                elif self.last_direction == 'left':
+                    self.left('event')
+                elif self.last_direction == 'right':
+                    self.right('event')
+            Snake.my_canvas.move(self.snake_body[-1], self.x, self.y)
+        else:
+            if self.snake_direction == 'up':
+                self.up('event')
+            elif self.snake_direction == 'down':
+                self.down('event')
+            elif self.snake_direction == 'left':
+                self.left('event')
+            elif self.snake_direction == 'right':
+                self.right('event')
+            Snake.my_canvas.move(self.snake_body[-1], self.x, self.y)
 
-            
+        #!I cannot switch the first and last. Instead I have to insert the last into the front
+        self.snake_body.insert(0, self.snake_body[-1])
+        del(self.snake_body[-1])
 
         self.after_var = True
-        self.head = self.snake_body[0]
-        self.head_x1 = Snake.my_canvas.coords(self.head)[0]
-        self.head_y1 = Snake.my_canvas.coords(self.head)[1]
-        self.head_x2 = Snake.my_canvas.coords(self.head)[2]
-        self.head_y2 = Snake.my_canvas.coords(self.head)[3]
+
+        self.head_x1 = Snake.my_canvas.coords(self.snake_body[0])[0]
+        self.head_y1 = Snake.my_canvas.coords(self.snake_body[0])[1]
+        self.head_x2 = Snake.my_canvas.coords(self.snake_body[0])[2]
+        self.head_y2 = Snake.my_canvas.coords(self.snake_body[0])[3]
 
         self.tail_x1 = Snake.my_canvas.coords(self.snake_body[-1])[0]
         self.tail_y1 = Snake.my_canvas.coords(self.snake_body[-1])[1]
         self.tail_x2 = Snake.my_canvas.coords(self.snake_body[-1])[2]
         self.tail_y2 = Snake.my_canvas.coords(self.snake_body[-1])[3]
 
-        if Snake.my_canvas.coords(self.head) == Snake.my_canvas.coords(Apple.apple_1):
+        if Snake.my_canvas.coords(self.snake_body[0]) == Snake.my_canvas.coords(Apple.apple_1):
             self.add_length()
             Snake.my_canvas.delete(Apple.apple_1)
             Apple.apple_count -= 1
@@ -82,59 +118,59 @@ class Snake():
 
 
         #*The tail coordinates
-        self.tail_x1 = Snake.my_canvas.coords(self.snake_body[-1])[0]
-        self.tail_y1 = Snake.my_canvas.coords(self.snake_body[-1])[1]
-        self.tail_x2 = Snake.my_canvas.coords(self.snake_body[-1])[2]
-        self.tail_y2 = Snake.my_canvas.coords(self.snake_body[-1])[3]
 
         #*I will have to change the order of the list too.
-        self.head_index = self.snake_body.index(self.head)
-        self.snake_body[self.head_index], self.snake_body[-1] = self.snake_body[-1], self.head
+
 
         #*Re-initiate the value after list order 
-        self.head = self.snake_body[0]
-        self.head_x1 = Snake.my_canvas.coords(self.head)[0]
-        self.head_y1 = Snake.my_canvas.coords(self.head)[1]
-        self.head_x2 = Snake.my_canvas.coords(self.head)[2]
-        self.head_y2 = Snake.my_canvas.coords(self.head)[3]
 
-        self.tail_x1 = Snake.my_canvas.coords(self.snake_body[-1])[0]
-        self.tail_y1 = Snake.my_canvas.coords(self.snake_body[-1])[1]
-        self.tail_x2 = Snake.my_canvas.coords(self.snake_body[-1])[2]
-        self.tail_y2 = Snake.my_canvas.coords(self.snake_body[-1])[3]
-
-        #*I think I can replace self.head_index with 0
-        print(f'self.head index : {self.head_index}')
-        print(f'snake body: {self.snake_body}')
-        print(f'head x1 {self.head_x1}')
-        print(f'tail x1: {self.tail_x1}')
-        print(f' head y1: {self.head_y1}')
-        print(f' tail y1: {self.tail_y1}')
 
         if self.head_x1 > 350 or self.head_x1 < 0 or self.head_y1 > 350 or self.head_y1 < 0:
             # *If I can go through the walls
 
             if self.wall_death:
                 # *Return to original position
-                Snake.my_canvas.move(self.head, -self.x, -self.y)
+                #*I think I will need a times 2 for the head to pop back
+                #?Not necessarily times 2 depending on length
+                Snake.my_canvas.move(self.snake_body[0], -self.x, -self.y)
                 self.after_var = False
             else:
                 # *Could make used moveto()
                 #!I need to move the tail instead of the head
                 if self.head_x1 > 350:
-                    Snake.my_canvas.move(self.head, -375, 0)
+                    Snake.my_canvas.move(self.snake_body[0], -375, 0)
                 elif self.head_x1 < 0:
-                    Snake.my_canvas.move(self.head, 375, 0)
+                    Snake.my_canvas.move(self.snake_body[0], 375, 0)
                 elif self.head_y1 > 350:
-                    Snake.my_canvas.move(self.head, 0, -375)
+                    Snake.my_canvas.move(self.snake_body[0], 0, -375)
                 elif self.head_y1 < 0:
-                    Snake.my_canvas.move(self.head, 0, 375)
-    
+                    Snake.my_canvas.move(self.snake_body[0], 0, 375)
+
+        self.head_x1 = Snake.my_canvas.coords(self.snake_body[0])[0]
+        self.head_y1 = Snake.my_canvas.coords(self.snake_body[0])[1]
+        self.head_x2 = Snake.my_canvas.coords(self.snake_body[0])[2]
+        self.head_y2 = Snake.my_canvas.coords(self.snake_body[0])[3]
+
+        self.tail_x1 = Snake.my_canvas.coords(self.snake_body[-1])[0]
+        self.tail_y1 = Snake.my_canvas.coords(self.snake_body[-1])[1]
+        self.tail_x2 = Snake.my_canvas.coords(self.snake_body[-1])[2]
+        self.tail_y2 = Snake.my_canvas.coords(self.snake_body[-1])[3]
 
         if self.after_var:
-            self.alive = Snake.my_canvas.after(2200, self.movement)
+            self.alive = Snake.my_canvas.after(200, self.movement)
         else:
             Snake.my_canvas.after_cancel(self.alive)
+
+        #*I am saving the last direction so I can block users trying to go the opposite way.
+        self.last_direction = self.snake_direction
+
+        print(f'self.x {self.x}')
+        print(f'self.y {self.y}')
+        print(f'self.snake body: {self.snake_body}')
+        print(f'self.head_x1: {self.head_x1}')
+        print(f'self.head_y1: {self.head_y1}')
+        print(f'self.tail_x1: {self.tail_x1}')
+        print(f'self.tail_y1: {self.tail_y1}')
 
     def add_length(self):
         #*Rather than checking the current distance, I think I should check where the current last object was.
@@ -193,6 +229,12 @@ class Snake():
         self.snake_direction = 'down'
 
     def left(self, event):
+        #!The reason it overlaps when I don't press anything is because the self.x and self.y values aren't changed.
+        #* This is because I didn't constantly hold the keybindings.
+        print(f'self.head_x1: {self.head_x1}')
+        print(f'self.head_y1: {self.head_y1}')
+        print(f'self.tail_x1: {self.tail_x1}')
+        print(f'self.tail_y1: {self.tail_y1}')
         #*There is a weird bug which causes the ting to skip numbers. I should fix that.
         self.x = self.head_x1 - self.tail_x1 -25
         self.y = self.head_y1 - self.tail_y1
