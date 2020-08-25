@@ -1,6 +1,6 @@
 from tkinter import *
+import tkinter.font
 import random
-import keyboard
 '''
 In this version, i am going to use the strategy of moving the end block to the front instead of moving everything.
 I am going to use tags to check which is the head.
@@ -35,12 +35,15 @@ class Snake():
         self.y = -25
         self.snake_direction = 'up'
         self.last_direction = 'up'
+        #!To check if a binding was actually pressed
+        self.pressed = False
         # *I am going to store the turns in the form of a nested list.
         # *The first four floats will be the coordinates where I have to turn.
         # *The fifth string will be the direction I need to turn to.
         self.turns = []
         # *Just a variable to allow wall passing or no.
-        self.wall_death = False
+        self.wall_death = True
+        self.bite_self_death = True
 
     # A great reference for controlling the speed of the moving boxes.
 
@@ -67,12 +70,14 @@ class Snake():
         #!I have to recognize that pressing the keyboard is different from the bind being activated.
         #?I might want to create a new variable which checks whether the KEY BINDING has been activated
         #*I can cancel the variable after moving it.
-        if keyboard.is_pressed('w') or keyboard.is_pressed('s') or keyboard.is_pressed('a') or keyboard.is_pressed('d'):
+        if self.pressed:
             #*If 
             #!I have a bug in which when I hold the bind button for long and release it, I can go in the opposite way.
             #*To fix this issue, I think I can cancel a specific binding when I press a button.
             #*Like when I press up, I can cancel up and down cuz i won't need it until the next move.
-            
+            #!I finally chose to comment out this code because the self.pressed variable filter is effective.
+            #*Also, issues happend when the length is 1.
+            '''
             temporary_check = [self.snake_direction, self.last_direction]
             if ('up' in temporary_check and 'down' in temporary_check) or ('left' in temporary_check and 'right' in temporary_check):
                 if self.last_direction == 'up':
@@ -83,7 +88,7 @@ class Snake():
                     self.left('event')
                 elif self.last_direction == 'right':
                     self.right('event')
-            
+            '''
             Snake.my_canvas.move(self.snake_body[-1], self.x, self.y)
         else:
             if self.snake_direction == 'up':
@@ -118,8 +123,18 @@ class Snake():
             Snake.my_canvas.delete(Apple.apple_1)
             Apple.apple_count -= 1
 
+
         if Apple.apple_count == 0:
             b.create_apple()
+
+        label_font = tkinter.font.Font(size=15, weight='bold')
+        if self.bite_self_death:
+            #*Run a for loop to see if coordinates match
+            #!Have to exclude head tho
+            for item in self.snake_body[1:]:
+                if Snake.my_canvas.coords(item) == Snake.my_canvas.coords(self.snake_body[0]):
+                    Label(self.root, text="YOU BIT YOURSELF!!", font=label_font, fg='red').grid(row=0, column=0)
+                    self.after_var = False
 
         #!Figuring out where the head is.
         #*I think I have to add the head first and then check
@@ -142,6 +157,8 @@ class Snake():
                 #?Not necessarily times 2 depending on length
                 Snake.my_canvas.move(self.snake_body[0], -self.x, -self.y)
                 self.after_var = False
+
+                Label(self.root, text='YOU SMASHED INTO A WALL!!', font=label_font, fg='red').grid(row=0, column=0)
             else:
                 # *Could make used moveto()
                 #!I need to move the tail instead of the head
@@ -172,6 +189,8 @@ class Snake():
         #*I am saving the last direction so I can block users trying to go the opposite way.
         self.last_direction = self.snake_direction
 
+        self.pressed = False
+
         print(f'self.x {self.x}')
         print(f'self.y {self.y}')
         print(f'self.snake body: {self.snake_body}')
@@ -195,30 +214,60 @@ class Snake():
             self.snake_x2= Snake.my_canvas.coords(self.snake_body[-1])[2]
             self.snake_y2= Snake.my_canvas.coords(self.snake_body[-1])[3]
         '''
-        if self.snake_direction == 'up':
-            self.add_length_x1 = self.tail_x1
-            # *Careful with the coordinate system
-            self.add_length_y1 = self.tail_y1 + 25
-            self.add_length_x2 = self.tail_x2
-            self.add_length_y2 = self.tail_y2 + 25
+        #?Rather than filtering my the current direction, I can use the coords of the last two parts of the body.
+        #*They must be in a straight line.
 
-        elif self.snake_direction == 'down':
-            self.add_length_x1 = self.tail_x1
-            self.add_length_y1 = self.tail_y1 - 25
-            self.add_length_x2 = self.tail_x2
-            self.add_length_y2 = self.tail_y2 - 25
+        #!This doesn't work for 1 length
+        try:
+            self.second_last_x1 = Snake.my_canvas.coords(self.snake_body[-2])[0]
+            self.second_last_y1 = Snake.my_canvas.coords(self.snake_body[-2])[1]
 
-        elif self.snake_direction == 'left':
-            self.add_length_x1 = self.tail_x1 + 25
-            self.add_length_y1 = self.tail_y1
-            self.add_length_x2 = self.tail_x2 + 25
-            self.add_length_y2 = self.tail_y2
+            if self.tail_x1 == self.second_last_x1 and self.tail_y1 - 25 == self.second_last_y1:
+                self.add_length_x1 = self.tail_x1
+                # *Careful with the coordinate system
+                self.add_length_y1 = self.tail_y1 + 25
+                self.add_length_x2 = self.tail_x2
+                self.add_length_y2 = self.tail_y2 + 25
 
-        elif self.snake_direction == 'right':
-            self.add_length_x1 = self.tail_x1 - 25
-            self.add_length_y1 = self.tail_y1
-            self.add_length_x2 = self.tail_x2 - 25
-            self.add_length_y2 = self.tail_y2
+            elif self.tail_x1 == self.second_last_x1 and self.tail_y1 + 25 == self.second_last_y1:
+                self.add_length_x1 = self.tail_x1
+                self.add_length_y1 = self.tail_y1 - 25
+                self.add_length_x2 = self.tail_x2
+                self.add_length_y2 = self.tail_y2 - 25
+
+            elif self.tail_y1 == self.second_last_y1 and self.tail_x1 - 25 == self.second_last_x1:
+                self.add_length_x1 = self.tail_x1 + 25
+                self.add_length_y1 = self.tail_y1
+                self.add_length_x2 = self.tail_x2 + 25
+                self.add_length_y2 = self.tail_y2
+
+            elif self.tail_y1 == self.second_last_y1 and self.tail_x1 + 25 == self.second_last_x1:
+                self.add_length_x1 = self.tail_x1 - 25
+                self.add_length_y1 = self.tail_y1
+                self.add_length_x2 = self.tail_x2 - 25
+                self.add_length_y2 = self.tail_y2
+        except IndexError:
+            if self.snake_direction == 'up':
+                self.add_length_x1 = self.tail_x1
+                # *Careful with the coordinate system
+                self.add_length_y1 = self.tail_y1 + 25
+                self.add_length_x2 = self.tail_x2
+                self.add_length_y2 = self.tail_y2 + 25
+            elif self.snake_direction == 'down':
+                self.add_length_x1 = self.tail_x1
+                self.add_length_y1 = self.tail_y1 - 25
+                self.add_length_x2 = self.tail_x2
+                self.add_length_y2 = self.tail_y2 - 25
+            elif self.snake_direction == 'left':
+                self.add_length_x1 = self.tail_x1 + 25
+                self.add_length_y1 = self.tail_y1
+                self.add_length_x2 = self.tail_x2 + 25
+                self.add_length_y2 = self.tail_y2
+            elif self.snake_direction == 'right':
+                self.add_length_x1 = self.tail_x1 - 25
+                self.add_length_y1 = self.tail_y1
+                self.add_length_x2 = self.tail_x2 - 25
+                self.add_length_y2 = self.tail_y2         
 
       # *As long as the rectange is in the list, I don't think I have to name it.
         self.snake_body.append(Snake.my_canvas.create_rectangle(
@@ -238,6 +287,7 @@ class Snake():
         self.root.unbind('<w>', self.up_bind)
         if len(self.snake_body) > 1:
             self.root.unbind('<s>',self.down_bind)
+        self.pressed = True
 
     def down(self, event):
         self.x = self.head_x1 - self.tail_x1
@@ -251,6 +301,7 @@ class Snake():
         self.root.unbind('<s>', self.down_bind)
         if len(self.snake_body) > 1:
             self.root.unbind('<w>', self.up_bind)
+        self.pressed = True
 
     def left(self, event):
         #!The reason it overlaps when I don't press anything is because the self.x and self.y values aren't changed.
@@ -267,6 +318,7 @@ class Snake():
         self.root.unbind('<a>', self.left_bind)
         if len(self.snake_body) > 1:
             self.root.unbind('<d>', self.right_bind)
+        self.pressed = True
 
     def right(self, event):
         self.x = self.head_x1 - self.tail_x1 + 25
@@ -281,7 +333,7 @@ class Snake():
         self.root.unbind('<d>', self.right_bind)
         if len(self.snake_body) > 1:
             self.root.unbind('<a>', self.left_bind)
-
+        self.pressed = True
 
 class Apple():
     apple_count = 0
